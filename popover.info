@@ -1,0 +1,8 @@
+name = Popover
+description = popover login screen.
+package = jbbi
+core = 7.x
+files[] = popover.module
+files[] = popover.js
+
+version = "7.x-0.1"

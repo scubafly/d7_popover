@@ -1,0 +1,88 @@
+div.ui-dialog {
+	font-size: 11px;
+}
+span#ui-dialog-title-dialog {
+	text-align: center;
+	width: 100%;
+}
+#popover-job-agent-form div.form-item {
+	width: 255px;
+	float: left;
+	margin-right: 5px;
+	margin-bottom: -4px;
+	margin-top: -5px;
+	margin-left: 5px
+}
+
+.form-item-third-field-functioncat {
+	width: 100% !important;
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+}
+
+.form-item-files-field-cv{
+	width: 420px !important;
+}
+
+fieldset#edit-second div.form-item {
+	width: 190px;
+}
+
+div.form-item-second-field-management-experience, 
+div.form-item-second-field-werkweek,
+div.form-item-second-field-dienstverb {
+	margin-top: 5px !important;
+}
+
+div#edit-second-field-management-experience div.form-item, 
+div#edit-second-field-dienstverb div.form-item,
+div#edit-second-field-werkweek div.form-item,
+div.form-item-second-experience div.form-item,
+div.form-item-second-education div.form-item {
+	width: 90px;
+	margin-top: 2px !important;
+}
+
+div#edit-fourth-subscribe-jobagent-cv div.form-item {
+	width: 110px;
+	margin-top: 0px !important;
+}
+
+div.fieldset-wrapper > div.form-item-fourth-subscribe-jobagent-cv {
+	width: 300px !important;
+}
+
+form#popover-job-agent-form fieldset {
+	/*border: 1px;*/
+	margin-top: 0px;
+	margin-bottom: 3px;
+/*	padding: 5px;*/
+}
+
+form#popover-job-agent-form fieldset legend {
+	display: none;
+}
+
+div.fieldset-wrapper > div.form-item > label {
+	font-weight: bold;
+}
+
+div#edit-third-field-functioncat {
+	margin-top: 5px;
+}
+span.form-required {
+	display: none;
+}
+select#edit-second-field-state {
+	width: 164px;
+}
+div.description {
+	font-size: 9px !important;
+}
+input#edit-fourth-submit {
+	float: right;
+	margin-top: 1px;
+}
+input#edit-sixth-submit {
+	margin-top: 1px;
+}

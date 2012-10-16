@@ -1,0 +1,918 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * A module to show the loginscreen on top of the site
+ */
+
+/**
+ * Implements hook_block
+ */
+function popover_block_info(){
+	$blocks['popover'] = array(
+		'info' => t('popover'),
+		'cache' => DRUPAL_CACHE_PER_PAGE,
+		'region' => 'header',
+		'status' => 1,
+	);
+	return $blocks;
+}
+	
+/** 
+ * Implements hook_menu()
+ */
+// function popover_menu(){
+// 	$items = array();
+
+	// $items['popover/password'] = array(
+	// 	'title' => 'Request new password',
+	// 	'page callback' => 'popover_password_form',
+	// 	'access callback' => TRUE,
+	// 	'type' => MENU_CALLBACK,
+	// 	'file' => 'popover.pages.inc',
+	// );
+	
+	// Proccess login via ajax
+	// $items['popover/user_login'] = array(
+	// 	'title' => 'Ajax user login',
+	// 	'page callback' => 'popover_login_ajax_callback',
+	// 	'access callback' => 'user_is_anonymous',
+	// 	'type' => MENU_CALLBACK,
+	// 	'file' => 'popover.pages.inc',
+	// 	'delivery callback' => 'popover_ajax_deliver_callback',
+	// );
+
+	// Proccess user password via ajax
+	// $items['popover/request_password'] = array(
+	// 	'title' => 'Ajax user password',
+	// 	'page callback' => 'popover_request_password_ajax_callback',
+	// 	'access callback' => TRUE,
+	// 	'type' => MENU_CALLBACK,
+	// 	'file' => 'popover.pages.inc',
+	// 	'delivery callback' => 'popover_ajax_deliver_callback',
+	// );
+
+// 	return $items;
+// }
+
+
+
+/**
+ * Implements hook_block_view
+ */
+function popover_block_view($delta = ''){
+		
+	switch($delta) {
+		case 'popover':
+			$block['subject'] = t('');
+			$block['content'] = popover_output();
+		break;
+	}
+	return $block;
+}
+
+/**
+ * align variables for theme ( template ) and call template
+ * return renderd output
+ */
+function popover_output() {
+	$variables = array('var' => '4');
+	return theme('popover', $variables);
+}
+
+/**
+ * Implements hook_theme()
+ */
+function popover_theme($existing, $type, $theme, $path) {
+	return array(
+		'popover' => array(
+			'variables' => array(
+				'var' => NULL,
+			),
+			'template' => 'popover',
+		),
+	);
+}
+
+/**
+ * create renderable array to display custom login form
+ */
+function popover_ajax_user_login_form($form, &$from_state) {
+	/* fieldset */
+	$form['messages'] = array(
+		'#type' => 'fieldset',
+		'#tree' => TRUE,
+	);
+	$form['user_login'] = array(
+		'#type' => 'fieldset',
+		
+		'#tree' => TRUE,
+	);
+
+	/* form elements */
+	$form['messages']['markup'] = array(
+		'#markup' => '<div id="ajaxchanger2"></div>',
+	);
+
+	$form['user_login']['mail'] = array(
+    '#title' => t('E-mailadres'),
+    '#type' => 'textfield',
+    '#size' => 25,
+    '#required' => TRUE,
+  );
+
+  $form['user_login']['password'] = array(
+    '#title' => t('Wachtwoord'),
+		'#type' => 'password',
+		'#size' => 25,
+		'#required' => TRUE,
+  );
+
+	$form['user_login']['submit'] = array(
+	  '#type' => 'submit',
+	  '#value' => t('Naar de vacature'),
+ 		'#ajax' => array(
+			'callback' => 'popover_login_ajax_callback',
+			'wrapper' => 'ajaxchanger2',
+		),
+  );
+
+  $form['linky'] = array(
+  	'#type' => 'hidden',
+  );
+
+
+  return $form;
+}
+
+/**
+ * Implements hook_form() or not? but should be changed because it's not a node editing form...
+ *	velden (tijdelijk) uitgeschakeld omdat deze een error geven... Uitzoeken!! -> taxonomy termen zijn nog niet aangemaakt?
+ */
+function popover_job_agent_form($form, &$form_state){
+
+	
+	// use mail as username
+	// $form['name'] = array(
+		// '#title' => t('Username'),
+		// '#description' => 'choose a username',
+		// '#type' => 'textfield',
+		// '#required' => TRUE,
+	// );
+	
+	// $form['name'] = array(
+		// '#title' => 'Name',
+		// '#type' => 'textfield',
+		// '#description' => 'Your name',
+		// '#prefix' => '<div id="ajaxchanger">',
+		// '#suffix' => '</div>',
+	// );
+	
+	// /* fieldsets */
+	
+	$form['prefirst'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('prefirst'),
+		'#tree' => TRUE,
+	);
+	$form['first'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('first'),
+	    '#tree' => TRUE,
+  	);
+	$form['third'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('third'),
+	    '#tree' => TRUE,
+  	);
+	$form['second'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('second'),
+	    '#tree' => TRUE,
+  	);
+	
+	$form['fourth'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('fourth'),
+	    '#tree' => TRUE,
+  	);
+	$form['fifth'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('fifth'),
+	    '#tree' => TRUE,
+  	);
+	$form['sixth'] = array(
+	    '#type' => 'fieldset',
+	    '#title' => t('sixth'),
+	    '#tree' => TRUE,
+  	);	
+	
+	/* end of fieldsets */
+	
+	$form['prefirst']['markup'] = array(
+		'#markup' => '<div id="ajaxchanger"></div>',
+	);
+	 
+	/* first fieldset */
+	
+	$form['first']['field_firstname'] = array(
+        '#title' => t('Voornaam'),
+        '#type' => 'textfield',
+        '#size' => 25,
+        '#required' => TRUE,
+    );
+	
+	$form['first']['mail'] = array(
+        '#title' => t('E-mail'),
+        //'#description' => 'enter a valid email address',
+        '#type' => 'textfield',
+        '#required' => TRUE,
+        '#size' => 25,
+    );
+	
+	// $cities = array();
+ //    foreach ($node->field_tags['und'] as $item) {
+ //      $cities[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+ //    }
+	// $city_vid = taxonomy_vocabulary_machine_name_load('field_city')->vid;
+	
+	// $form['first']['field_city'] = array(
+	// 	'#title' => t('Woonplaats'),
+	// 	'#type' => 'textfield',
+	// 	// '#default_value' => taxonomy_implode_tags($cities),
+	//    	'#size' => 25,
+	// 	// '#autocomplete_path' => 'taxonomy/autocomplete/field_city',
+	// 	// '#element_validate' => array('taxonomy_autocomplete_validate'),
+	// 	'#required' => TRUE,
+	// 	'#field_name' => 'field_city',
+	// 	// '#language' => 'nl',
+	// 	// '#field_parents' => array('field_city'),
+	// );
+
+	$voca = taxonomy_vocabulary_machine_name_load('field_city');
+	$form['first']['field_city'][$voca->vid] = array(
+		'#type' => 'textfield',
+		'#title' => $voca->name,
+		'#required' => TRUE,
+		'#field_name' => $voca->machine_name,
+		// '#language' => 'nl',
+		// '#field_parents' => array($voca->machine_name),
+		// '#element_validate' => array('taxonomy_autocomplete_validate'),
+		// '#default_value' => 'test_default_value',
+		'#autocomplete_path' => 'taxonomy/autocomplete/' . $voca->machine_name,
+		'#size' => 25,
+	);
+	
+	/* end of fist fieldset */
+	
+	/* second fieldset */
+	
+	// $form['second']['education'] = array(
+	// 	'#type' => 'radios',
+	// 	'#title' => 'Afgeronde opleiding',
+	// 	'#options' => popover_get_tax_term_options('education'),
+	// 	'#default_value' => variable_get('education', NULL),
+	// 	'#required' => TRUE,
+	// );
+	
+	// $form['second']['experience'] = array(
+	// 	'#type' => 'radios',
+	// 	'#title' => 'Relevante werkervaring',
+	// 	'#options' => popover_get_tax_term_options('workexperience'),
+	// 	'#default_value' => variable_get('experience', NULL),
+	// 	'#required' => TRUE,
+	// );
+	
+	$form['second']['field_state'] = array(
+		'#type' => 'select',
+		'#title' => 'Gewenste werkgebied(en)',
+		'#options' => popover_get_tax_term_options('field_state'),
+		'#required' => TRUE,
+		'#multiple' => TRUE,
+		'#size' => 4,
+		'#description' => 'gebruik <span class="givemelinkcolor">ctrl-toets</span> voor meerdere provincies',
+	);
+	
+	$form['second']['field_dienstverb'] = array(
+		'#type' => 'checkboxes',
+		'#title' => 'Dienstverband',
+		'#options' => popover_get_tax_term_options('field_dienstverb'),
+		'#required' => TRUE,
+	);
+	
+	$form['second']['field_werkweek'] = array(
+		'#type' => 'checkboxes',
+		'#title' => 'Werkweek',
+		'#options' => popover_get_tax_term_options('field_werkweek'),
+		'#required' => TRUE,
+	);
+	
+	$form['second']['field_management_experience'] = array(
+		'#type' => 'radios',
+		'#title' => 'Management ervaring',
+		'#options' => popover_get_tax_term_options('field_management_experience'),
+		'#default_value' => variable_get('field_management_experience', NULL), 
+		'#required' => TRUE,
+	);
+	
+	/* end of second fieldset */
+	
+	/* third fieldset */
+	
+	$form['third']['field_functioncat'] = array(
+		'#type' => 'checkboxes',
+		'#title' => 'Functiecategorie(n)',
+		'#options' => popover_get_tax_term_options('field_functioncat'),
+		'#required' => TRUE,
+	);
+	
+	/* end of third fieldset */
+	
+	/* fourth fieldset */
+	
+	// $form['fourth']['subscribe_jobagent_cv'] = array(
+	// 	'#type' => 'radios',
+	// 	'#title' => t('Job Agent of CV uploaden'),
+	// 	'#options' => array(
+	// 		0 => 'Job Agent',
+	// 		1 => 'CV uploaden',
+	// 	),
+	// 	'#required' => TRUE,
+	// );
+	
+	$form['fourth']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Naar de vacature'),
+        '#ajax' => array(
+			 'callback' => 'popover_ajax_callback',
+			 'wrapper' => 'ajaxchanger',
+		 ),
+    );
+	
+	/* end of fourth fieldset */
+	
+	/* fifth fieldset */
+	
+	// $form['fifth']['field_cv'] = array(
+	// 	'#title' => t('CV'),
+	// 	'#type' => 'file',
+	// 	'#size' => 19,
+	// 	'#name' => 'field_cv',
+	// 	//'#default_value' => empty($form_state['values']['fifth']['field_cv']) ? '' : $form_state['values']['fifth']['field_cv'],
+	// );
+	
+	// $form['fifth']['field_lastname'] = array(
+ //        '#title' => t('Achternaam'),
+ //        '#type' => 'textfield',
+ //        '#size' => 25,
+ //    );
+	
+	
+	// // add empty option for salaris indicatie
+	// $options = popover_get_tax_term_options('field_salery');
+	// array_unshift($options, '');
+	// $form['fifth']['field_salery'] = array(
+	// 	'#type' => 'select',
+	// 	'#title' => 'Salarisindicatie',
+	// 	'#options' => $options,
+	// );
+	
+	/* end of fifth fieldset */
+	
+	$form['sixth']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Naar de vacature'),
+        '#ajax' => array(
+			'callback' => 'popover_ajax_callback',
+			 'wrapper' => 'ajaxchanger',
+		),
+    );
+
+	return $form;
+
+	// TODO needs to be numberic
+	// $form['second']['field_phone'] = array(
+		// '#title' => t('Telefoonnr.'),
+		// '#type' => 'textfield',
+	// );
+	//autotagging taxonomy widget
+	
+	// selection taxonomy widget 
+
+	// selection taxonomy widget 
+	// $form['second']['field_availablein'] = array(
+		// '#type' => 'select',
+		// '#title' => 'Beschikbaar per/over:',
+		// '#options' => popover_get_tax_term_options('availablein'),
+	// );
+
+	// $form['second']['sex'] = array(
+		// '#type' => 'radios',
+		// '#title' => 'Geslacht',
+		// '#options' => array(
+			// 0 => 'man',
+			// 1 => 'vrouw',
+		// ),
+	// );
+
+}
+
+// /**
+//  * Custom delivery callback
+//  */
+// function popover_ajax_deliver_callback($page_callback_result){
+// 	print $page_callback_result;
+// 	ajax_footer();
+// }
+
+/**
+ * ajax callback for login_ajax_form
+ * shows vacancy link on succesfull login.
+ * TODO: hide login screen on succesfull login.
+ * TODO: open in nieuw venser
+ * TODO: refresh page
+ */
+function popover_login_ajax_callback($form, &$form_state) {
+	// didn't get this fixed propperly so invoking javascript here... :(  not proud of it but it works... ( also gets called 3 times :( )
+	$ugly = "<script type='text/javascript'>(function ($) {
+  Drupal.behaviors.popover_nohide = {
+    attach: function (context, settings) {    	
+	 	$('#clickme2').attr('href', $('.cheat').attr('href'));
+	 	$('#edit-user-login').hide();
+	 	$('#clickme2').click(function() {
+	  		location.reload();
+		});
+	}
+  };
+})(jQuery);
+</script>";
+
+	$errors = form_get_errors();
+	if(!$errors) {
+		
+		// show message open vacature / naar profiel
+		// drupal_add_js('window.open("http://www.google.com"); alert("o hi!")', 'inline');
+
+		// set linky value
+		return array('#markup' => $ugly.'<div id="ajaxchanger2">Klik op deze <a id="clickme2" href="#" target="_blank">link</a> om de vacature te openen.</div>');
+	}
+	else {
+		// show errors
+		return array('#markup' => '<div id="ajaxchanger2"></div>');	
+	}
+}
+
+function popover_ajax_callback($form, &$form_state) {
+	
+
+	// check if form is goed ingevuld
+	$errors = form_get_errors();
+	if( !$errors ) {
+
+		// popover_job_agent_form_submit($form, $form_state);
+		// no errors create new window with vacancy
+		// drupal_add_js(drupal_get_path('module', 'popover') . '/popover_hide.js', 'file');
+		// drupal_add_js('window.open("http://www.google.com"); alert("o hi!")', 'inline');
+		// log user in
+		// $uid = //newly made user
+		// focus on other window
+		
+		return array('#markup' => '<div id="ajaxchanger">Klik op deze <a id="clickme" href="#" target="_blank">link</a> om de vacature te openen.</div>');
+	}
+	
+	// else show the errors
+	return array('#markup' => '<div id="ajaxchanger"></div>');
+}
+
+
+/**
+ * validate login form
+ * if everything's good, log user in else trow form error
+ * next version update this to check for email or username so user can enter either in the 'mail' field
+ */
+function popover_ajax_user_login_form_validate($form, &$form_state) {
+	global $user;
+	// get form posted username and pass
+	$mail = $form_state['values']['user_login']['mail'];
+	$pass = $form_state['values']['user_login']['password'];
+	if (!empty($mail) && !empty($pass)) {
+		$account = user_load_by_mail($mail);
+		require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+		if(user_check_password($pass, $account)) {
+			// user did good!
+			$user = $account;
+			// Update user to new password scheme if needed.
+			if(user_needs_new_hash($account)) {
+				user_save($account, array('pass', $pass));
+			}
+			// log user in.
+			user_login_finalize($form_state);
+		} 
+		else {
+			// user made some errors
+			form_set_error('mail', t('Het email adres is onbekend of het wachtwoord is onjuist.'));
+		}
+	}
+}
+
+/**
+ * Implements hook_form_validate()
+ * originaly was popover_form_validate()
+ */
+function popover_job_agent_form_validate($form, &$form_state) {
+	//debug($form);
+	// check email and email as username name
+	$mail = $form_state['values']['first']['mail'];
+	if($mail) {
+		
+		$result = db_query("SELECT COUNT(*) FROM {users} WHERE mail = :mail", array( ':mail' => $mail));
+		$mailadress = $result->fetchField();
+		if ($mailadress) {
+			// User doesn't exist
+			form_set_error('Gebruikersnaam', t('Het email adres is al in gebruik.'));
+	  	}
+		elseif(!valid_email_address($mail)) {
+			// check if email is valid
+			form_set_error('Email', t('Het ingevoerde email adres is ongeldig'));
+		}
+	} // else let drupal take over and trow error on REQUIRED => TRUE ( $name != filled in )
+	
+	// check field_city if term (city) exists in vocabulary
+
+	$city = array_keys($form_state['values']['first']['field_city']);
+	$city_name = $form_state['values']['first']['field_city'][$city[0]];
+	$result = taxonomy_get_term_by_name($city_name, 'field_city');
+
+	// check the result
+	if(!$result) {
+		/* removed inserting of new values. and added custom error if value doesn't exists. to let users insert values uncomment the code
+		// insert the new term name:
+		// get taxonomy id
+		$field_name = 'field_city';
+		// Get the field info
+		$info = field_info_field($field_name);
+		// The link to the vocab is stored as it's machine name
+		$vocab_machine_name = $info['settings']['allowed_values'][0]['vocabulary'];
+		// Load the vocab by machine name
+		$vocab = taxonomy_vocabulary_machine_name_load($vocab_machine_name);
+		// Finally, get the vid
+		$vid = $vocab->vid;
+		// create new term name
+		$term = new stdClass();
+		$term->vid = $vid;
+		$term->name = $city_name;
+		taxonomy_term_save($term);
+		*/
+		form_set_error('Stad', t('Uw plaatsnaam is niet beschikbaar, selecteer de dichtstbijzijnde gemeente uit de lijst.'));
+	}
+
+	/**
+	// TODO custom validation upon cv-uploaden selection 
+		werkt nog niet, krijg de Kon CV niet uploaden melding op form validation
+	*/
+	//	watchdog("issitme", "WTF!?!", array(), WATCHDOG_ALERT);
+	// if form isset to cv upload, check additional fields.
+	if($form_state['values']['fourth']['subscribe_jobagent_cv'] == 1) {
+		
+		// TODO check cv field
+		// $file = file_save_upload('field_cv', array(
+		// 	'file_validate_extensions' => array('png gif jpg jpeg')
+		// ));
+		// if($file) {
+		// 	// move file into Drupal file system
+		// 	if($file = file_move($file, 'public://')) {
+		// 		// Save the file for use in the submit handler
+		// 		$form_state['storage']['field_cv'] = $file;
+		// 	}
+		// 	else {
+		// 		form_set_error('CV',t('Kon het bestand niet uploaden.'));
+		// 	}
+		// }
+		// else {
+		// 	form_set_error('CV', t('Kon CV niet uploaden.'));
+		// }
+		// if(!$form_state['values']['fifth']['field_cv']){
+
+		// }
+
+		$file = file_save_upload('field_cv', 
+			array(
+				'file_validate_extensions' => array('txt doc pdf'),
+			),
+			'public://',
+			FILE_EXISTS_RENAME
+		);
+
+		if($file) {
+			if($file = file_move($file, 'public://')) {
+				$form_state['values']['field_cv'] = $file;
+			}
+			else {
+				form_set_error('field_cv', t('Failed to write the uploaded file to the site\'s file folder.'));
+			}
+		}
+		else {
+			form_set_error('field_cv', t('No file was uploaded.'));
+		}
+
+
+		// check achternaam
+		if(!$form_state['values']['fifth']['field_lastname']) {
+			form_set_error('Achternaam', t('Uw achternaam is niet ingevuld'));
+		}
+
+		// check salaris indicatie
+		// TODO: add empty value in form voor salery
+		if(!$form_state['values']['fifth']['field_salery']) {
+			form_set_error('Salarisindicatie', t('U heeft geen salarisindicatie geselecteerd.'));
+		}
+	}
+
+
+
+
+
+
+	// $entity_type = 'node';
+	// $field_name = 'field_hours';
+	// $bundle_name = 'vacature';
+// 	
+	// $info_config = field_info_field($field_name);
+	// //debug($info_config);
+	// $info_instance = field_info_instance($entity_type, $field_name, $bundle_name);
+	// unset($info_config['id']);
+	// unset($info_instance['id'], $info_instance['field_id']);
+	// include_once DRUPAL_ROOT . '/includes/utility.inc';
+	// $output = "field_create_field(" . drupal_var_export($info_config) . ");\n";
+	// $output .= "field_create_instance(" . drupal_var_export($info_instance) . ");";
+	// drupal_set_message("<textarea rows=30 style=\"width: 100%;\">". $output .'</textarea>');
+// 	
+	// $instance = array(
+		  // 'field_name' => 'workexperience',
+		  // 'entity_type' => 'user',
+		  // 'label' => 'Werk ervaring',
+		  // 'bundle' => 'user',
+		  // 'widget' => array(
+		    // 'type' => 'options_buttons',
+		    // 'weight' => -4,
+		  // ),
+		  // 'display' => array(
+		    // 'default' => array(
+		      // 'type' => 'taxonomy_term_reference_link',
+		      // 'weight' => 10,
+		    // ),
+		    // 'teaser' => array(
+		      // 'type' => 'taxonomy_term_reference_link',
+		      // 'weight' => 10,
+		    // ),
+		  // ),
+		// );
+	// field_create_instance($instance);
+	
+	// $instance = array(
+		  // 'field_name' => 'field_state',
+		  // 'entity_type' => 'user',
+		  // 'label' => 'Provincie',
+		  // 'bundle' => 'user',
+		  // 'required' => TRUE,
+		  // 'widget' => array(
+		    // 'type' => 'options_select',
+		  // ),
+		  // 'display' => array(
+		    // 'default' => array(
+		      // 'type' => 'taxonomy_term_reference_link',
+		      // 'weight' => 10,
+		    // ),
+		    // 'teaser' => array(
+		      // 'type' => 'taxonomy_term_reference_link',
+		      // 'weight' => 10,
+		    // ),
+		  // ),
+		// );
+	// field_create_instance($instance);
+}
+
+/**
+ * submit form ** is not a hook!! **
+ * form_submit is called by default like form_id_form_validate is or something like that see: http://drupal.org/node/751826
+ */
+function popover_job_agent_form_submit($form, &$form_state){
+	debug($form);
+
+	global $base_url, $user;
+	$site_mail = variable_get('site_mail', '');
+	$site_name = variable_get('site_name', '');
+	// $value = print_r($form_state);
+	// watchdog("issitme", "WTF!?!", array(), WATCHDOG_ALERT);
+	$password = user_password();
+	$new_user = drupal_anonymous_user();
+	$new_user->name = $form_state['values']['first']['mail']; // use mail as username
+	$new_user->pass = $password;
+	$new_user->mail = $form_state['values']['first']['mail'];
+	$new_user->init = $form_state['values']['first']['mail']; // mail adres for initial account creation
+	$new_user->access = REQUEST_TIME;
+	$new_user->language = 'nl';
+	$new_user->status = TRUE; // set user to be active on registration
+	$new_user->field_firstname[LANGUAGE_NONE][0]['value'] = $form_state['values']['first']['field_firstname'];
+	
+	//$new_user->field_city[LANGUAGE_NONE][0]['value'] = $form_state['values']['first']['field_city'];
+
+	/**
+		TODO: if new city, create new taxonomy value... should have been done in the validation proccess??
+	*/
+
+	foreach ($form_state['values']['first']['field_city'] as $key => $value) {
+		// if($value > 0){
+			$result = taxonomy_get_term_by_name($value, 'field_city');
+			$result = array_keys($result);
+			$result = $result[0];
+			
+			$new_user->field_city[LANGUAGE_NONE][$result]['tid'] = $result;
+				
+		// }
+	}
+	// put in 	$new_user->field_dienstverb[LANGUAGE_NONE][0,1, 2, 3, etc....]['tid'] = 2; 
+	foreach($form_state['values']['second']['field_dienstverb'] as $key => $value) {
+		if($value > 0){
+			$new_user->field_dienstverb[LANGUAGE_NONE][$key]['tid'] = $value;
+		}
+	}
+	
+	foreach ($form_state['values']['second']['field_werkweek'] as $key => $value) {
+		if($value > 0){
+			$new_user->field_werkweek[LANGUAGE_NONE][$key]['tid'] = $value;
+		}
+	}
+
+	foreach ($form_state['values']['second']['field_state'] as $key => $value) {
+		if($value > 0){
+			$new_user->field_state[LANGUAGE_NONE][$key]['tid'] = $value;
+		}
+	}
+
+	foreach ($form_state['values']['third']['field_functioncat'] as $key => $value) {
+		if($value > 0){
+			$new_user->field_functioncat[LANGUAGE_NONE][$key]['tid'] = $value;
+		}
+	}
+
+	// $new_user->field_education[LANGUAGE_NONE][$key]['tid'] = $form_state['values']['second']['education'];
+	// work experience
+	//$new_user->field_education[LANGUAGE_NONE][$key]['tid'] = $form_state['values']['second']['experience'];
+	// management experience
+
+    $new_user->field_management_experience[LANGUAGE_NONE][$key]['tid'] = $form_state['values']['second']['field_management_experience'];
+	
+	/**
+	TODO: add fields field_salary, field_lastname, field_cv if subscrube_jobagent_cv isset to 1
+	*/
+	// Salarisindicatie
+	// $form_state['values']['fifth']['field_salery']
+	
+	// Achternaam
+	//	$form_state['values']['fifth']['field_lastname']
+	
+	// CV maar deze doet het niet ( is een file )
+	// $form_state['values']['fifth']['field_cv'];
+	
+	//$new_user->field_hours[LANGUAGE_NONE][0]['tid'] = $form_state['values']['second']['field_werkweek'];
+	//$new_user->education[LANGUAGE_NONE][0]['value'] = $form_state['values']['second']['education'];
+	//watchdog("issitme", "WTF!?!", array(), WATCHDOG_ALERT);
+	
+	$new_user = user_save($new_user);
+	//debug($form_state['values']['second']['field_dienstverband']);
+	//$new_user = user_save(drupal_anonymous_user(), $edit);
+	
+	// add user role to the new user
+	$role_name = 'kandidaat'; // The name of the role to add.
+	if ($role = user_role_load_by_name($role_name)) {
+  		user_multiple_role_edit(array($new_user->uid), 'add_role', $role->rid);
+	}
+	
+	// log user in ( overwrite the global $user with the newly created user )
+	$user = user_load($new_user->uid);
+	// set redirect
+  	user_login_finalize($form_state);
+	
+	// on success mail user: TODO $site_name en $site_mail werken nog niet.
+	// $to = $form_state['values']['first']['mail'];
+ //    $subject = 'Nieuw account aangemaakt';
+ //    $headers = "From: ". $site_mail ."\nContent-type: text/html";
+ //    $body = "Beste ".$form_state['values']['first']['field_firstname'].",<br /><br />";
+	// $body .= 'Er is een nieuw gebruikersaccount aangemaakt op <a href="'.$base_url.'">'.$site_name.'</a>.<br />';
+ //    $body .= 'Uw login gegevens zijn de volgende:<br />Gebruikersnaam: <b>'.$form_state['values']['first']['mail'].'</b><br /> Wachtwoord: <b>'.$password.'</b> <br /><br />';
+ //    $body .= 'Log in op <a href="'.$base_url.'/user">'.$base_url.'/user</a> en klik op bewerken om uw wachtwoord aan te passen.<br /><br />';
+ //    $body .= 'Met vriendelijke groet,<br /><br />';
+	// $body .= $site_name.' team';
+	
+    // stop mailing... disabled for development reasons.
+    // need to change to drupa_mail() in the
+    // mail($to,$subject,$body,$headers);
+    popover_send_registration_mail($user, $password);
+	
+	// open new window with vacancy
+	// call openthisurl() js (jquery) function form php	
+}
+
+/*
+ * set up the email and call hook_mail() by using the drupal_mail() function.
+ */
+function popover_send_registration_mail($user, $password) {
+	global $base_url;
+	$module = 'popover';
+	$key = 'popover_user_registration';
+	$to = $user->mail;
+	$language = user_preferred_language($user);
+	$params = array(
+			'username' => $user->name,
+			'site-name' => variable_get('site_name', ''),
+			'password' => $password,
+			'siteurl' => $base_url,
+			'mail' => $user->mail,
+		);
+	$from = variable_get('site_mail', 'info@branche_vacatures.nl');
+	$send = TRUE;
+
+	$result = drupal_mail($module, $key, $to, $language, $params, $from, $send);
+}
+
+/**
+ * Implements hook_mail()
+ */
+function popover_mail($key, &$message, $params) {
+	global $user; // user should be logged in by now?
+
+	$options = array(
+		'langcode' => $message['language']->language,
+	);
+
+	switch ($key) {
+		case 'popover_user_registration':
+			$message['subject'] = t('Nieuw account aangemaakt');
+			// on success mail user: TODO $site_name en $site_mail werken nog niet.
+	
+			$body[] = 'Beste :username,';
+			$body[] = 'Er is een nieuw gebruikersaccount aangemaakt op <a href=":siteurl">:site-name</a>.';
+			$body[] = 'Uw login gegevens zijn de volgende:';
+			$body[] = 'Email: <b>:mail</b><br /> Wachtwoord: <b>:password</b>';
+			$body[] = 'Log in op <a href=":siteurl/user">:siteurl/user</a> en klik op bewerken om uw wachtwoord aan te passen.';
+			$body[] = 'Met vriendelijke groet,';
+			$body[] = ':site-name team';
+
+			foreach($body as $message_body){
+				$message['body'][] = t($message_body, 
+					array(
+						':username' => $params['username'], 
+						':site-name' => $params['site-name'], 
+						':password' => $params['password'], 
+						':siteurl' => $params['siteurl'],
+						':mail' => $params['mail'],
+
+					), 
+					$options );
+			}
+			break;
+	}
+}
+
+/**
+ * helper function to get taxonomy term options for select/checkbox/radio widget
+ * @arguments 
+ * @return array of select options for form
+ */
+function popover_get_tax_term_options($machine_name){
+	// $options = array( '0' => '');
+
+	if($machine_name){
+		// machine_name bestaat niet als taxonomy vocabulary
+		$vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
+		$options_source = taxonomy_get_tree($vid);
+		
+		foreach($options_source as $item ) {
+			$key = $item->tid;
+			$value = $item->name;
+			$options[$key] = $value;
+		}
+	
+		return $options;	
+	}
+	return NULL;
+}
+
+/**
+ * Implements hook_menu_alter()
+ */
+function popover_menu_alter(&$item) {
+	// remove user/register tab
+	$item['user/register']['type'] = MENU_CALLBACK;
+	// remove acces to callback so users cannot use it to do wrong register
+	$item['user/register']['access callback'] = FALSE;
+}
+
+function popover_ajax_login_callback($form, &$form_state) {
+	$errors = form_get_errors();
+	if($errors) {
+		return array('#markup' => '<div id="popover-error"></div>');	
+	}
+}

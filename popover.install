@@ -1,0 +1,568 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * install script
+ * 
+ * TODO add weight to terms
+ */
+
+
+/**
+ * Implements hook_enable 
+ * runs every time this module is enabled, to run only at install use hook_install 
+ * but once the module has been enabled ( even only once ) hook_install won't be called anymore. 
+ */
+function popover_enable(){
+	// array of vacabularies
+	
+	// define vocabularies and terms
+	$vocabularies = new PopoverVocabularies();
+	
+	$term_names = array(
+		'20.000 - 25.000',
+		'25.000 - 30.000',
+		'30.000 - 35.000',
+		'35.000 - 40.000',
+		'40.000 - 45.000',
+		'45.000 - 50.000',
+		'50.000 - 55.000',
+		'55.000 - 60.000',
+		'60.000 - 65.000',
+		'70.000 - 80.000',
+		'65.000 - 70.000',
+		'80.000 - 90.000',
+		'90.000 - 100.000',
+		'100.000+',
+	);
+	$vocabularies->add_vocabulary('Salaris indicatie','field_salery');
+	$vocabularies->add_terms('field_salery', $term_names);
+	$term_names = NULL;
+	
+	$term_names = array(
+		'Ja',
+		'Nee',
+	);
+	$vocabularies->add_vocabulary('Management ervaring', 'field_management_experience');
+	$vocabularies->add_terms('field_management_experience', $term_names);
+	$term_names = NULL;
+	
+	// worden niet gebruikt
+	$term_names = array(
+		0 => '0-2 jaar',
+		1 => '2-5 jaar',
+		2 => '5-8 jaar',
+		3 => '8+  jaar',
+	);
+	$vocabularies->add_vocabulary('Werkervaring', 'workexperience');
+	$vocabularies->add_terms('workexperience', $term_names);
+	$term_names = NULL;
+
+	$term_names = array(
+		0 => 'MBO / HAVO / VWO',
+		1 => 'HBO',
+		2 => 'WO',
+		3 => 'propodeuse+',
+	);
+	$vocabularies->add_vocabulary('Beschikbaar in', 'availablein');
+	$vocabularies->add_terms('availablein', $term_names);
+	$term_names = NULL;
+	
+	$term_names = array(
+		'Direct',
+		'1 Week',
+		'2 Weken',
+		'3 Weken',
+		'4 Weken',
+		'1-2 Maanden',
+	);
+	$vocabularies->add_vocabulary('Opleiding', 'field_education');
+	$vocabularies->add_terms('field_education', $term_names);
+	$term_names = NULL;
+
+	// somehow 'create' taxonomy here to be  connected
+	// new taxonomies work fine, old onces are not inserterd or updated at the moment
+
+	// create fields for saving user data
+	// popover_create_user_field('field_firstname', 'Voornaam', 'textfield', 1, true); // krijgt wel een instance terug
+	// popover_create_user_field('field_city', 'Woonplaats', 'textfield', 1, true); //TODO change to autotagging // krijgt geen instance terug // is al aangemaakt?
+	
+	// ---- \\
+	// http://api.drupal.org/api/drupal/modules!field!field.crud.inc/function/field_update_instance/7
+	// load field
+	$instance = field_info_instance('node', 'field_city', 'vacature');
+	// Make whatever changes you need to, e.g.
+	// in this case add field to user registration form.
+	$instance['settings']['user_register_form'] = 1;
+	// And save it again
+	// field_update_instance($instance);
+	
+	// field_education should only be an instance of the field? field aready created as taxonomy term??
+	
+	// $field = array(
+	// 	'field_name' => 'field_education',
+	// 	'type' => 'taxonomy_term_reference',
+	// 	'settings' => array(
+	// 		'allowed_values' => array(
+	// 			array(
+	// 				'vocabulary' => 'field_education',
+	// 				'parent' => 0,
+	// 			),
+	// 		),
+	// 	),
+	// );
+	// field_create_field($field);
+
+	// $vocabulary = taxonomy_vocabulary_load($vid);
+	// $vocabulary = popover_get_vocabulary_by_machine_name('werkweek');
+	// if($vocabulary) {
+	
+	// connect taxonomy terms to user for the registration form.
+	// TODO build in check if field is not already created ( for this bundle: user )
+	// TODO make fields required
+	
+
+	$term_names = array(
+		'Fulltime',
+		'Parttime',
+	);
+	$vocabularies->add_vocabulary('Werkweek', 'field_werkweek');
+	$vocabularies->add_terms('field_werkweek', $term_names);
+	$term_names = NULL;
+
+	
+	$instance = array(
+	  'field_name' => 'field_werkweek', //field_werkweek
+	  'entity_type' => 'user',
+	  'label' => 'Werkweek',
+	  'bundle' => 'user',
+	  'required' => TRUE,
+	  'widget' => array(
+	    'type' => 'options_buttons',
+	    'weight' => -4,
+	  ),
+	  'display' => array(
+	    'default' => array(
+	      'type' => 'taxonomy_term_reference_link',
+	      'weight' => 10,
+	    ),
+	    'teaser' => array(
+	      'type' => 'taxonomy_term_reference_link',
+	      'weight' => 10,
+	    ),
+	  ),
+	);
+	// if bundle user has this instance skip creation
+	popover_field_create_update_instance($instance);
+
+
+	$instance = array(
+		  'field_name' => 'field_dienstverb', // field_dienstverband
+		  'entity_type' => 'user',
+		  'label' => 'Dienstverband',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'widget' => array(
+		    'type' => 'options_buttons',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);
+	
+	// woonplaats
+	$instance = array(
+		  'field_name' => 'field_city',
+		  'entity_type' => 'user',
+		  'label' => 'Stad',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'widget' => array(
+		    'type' => 'taxonomy_autocomplete',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);
+	
+	// functie categorie
+	$instance = array(
+		  'field_name' => 'field_functioncat',
+		  'entity_type' => 'user',
+		  'label' => 'Functie categorie',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'widget' => array(
+		    'type' => 'options_buttons',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);	
+	
+	// management ervaring
+	$instance = array(
+		  'field_name' => 'field_management_experience',
+		  'entity_type' => 'user',
+		  'label' => 'Management ervaring',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'widget' => array(
+		    'type' => 'options_buttons',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);
+	
+	// achternaam
+	// popover_create_user_field('field_lastname', 'Achternaam', 'textfield', 1);
+	
+	// slaris indicatie
+	// $instance = array(
+	// 	  'field_name' => 'field_salery',
+	// 	  'entity_type' => 'user',
+	// 	  'label' => 'Salaris indicatie',
+	// 	  'bundle' => 'user',
+	// 	  'required' => TRUE,
+	// 	  'widget' => array(
+	// 	    'type' => 'options_select',
+	// 	    'weight' => -4,
+	// 	  ),
+	// 	  'display' => array(
+	// 	    'default' => array(
+	// 	      'type' => 'taxonomy_term_reference_link',
+	// 	      'weight' => 10,
+	// 	    ),
+	// 	    'teaser' => array(
+	// 	      'type' => 'taxonomy_term_reference_link',
+	// 	      'weight' => 10,
+	// 	    ),
+	// 	  ),
+	// 	);
+	// popover_field_create_update_instance($instance);	
+	
+	// provincie
+	$instance = array(
+		  'field_name' => 'field_state',
+		  'entity_type' => 'user',
+		  'label' => 'Provincie',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'user_register_form' => 1, // werkt niet?
+		  'widget' => array(
+		    'type' => 'options_select',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);
+
+	// overige velden
+
+	// werkervaring
+
+	// $instance = array(
+	// 	  'field_name' => 'field_experience', 
+	// 	  'entity_type' => 'user',
+	// 	  'label' => 'Werkervaring',
+	// 	  'bundle' => 'user',
+	// 	  'required' => TRUE,
+	// 	  'widget' => array(
+	// 	    'type' => 'options_buttons',
+	// 	    'weight' => -4,
+	// 	  ),
+	// 	  'display' => array(
+	// 	    'default' => array(
+	// 	      'type' => 'taxonomy_term_reference_link',
+	// 	      'weight' => 10,
+	// 	    ),
+	// 	    'teaser' => array(
+	// 	      'type' => 'taxonomy_term_reference_link',
+	// 	      'weight' => 10,
+	// 	    ),
+	// 	  ),
+	// 	);
+	// popover_field_create_update_instance($instance);
+
+	// opleiding
+	$instance = array(
+		  'field_name' => 'field_education',
+		  'entity_type' => 'user',
+		  'label' => 'Opleiding',
+		  'bundle' => 'user',
+		  'required' => TRUE,
+		  'widget' => array(
+		    'type' => 'options_buttons',
+		    'weight' => -4,
+		  ),
+		  'display' => array(
+		    'default' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		    'teaser' => array(
+		      'type' => 'taxonomy_term_reference_link',
+		      'weight' => 10,
+		    ),
+		  ),
+		);
+	popover_field_create_update_instance($instance);
+}
+
+function _popover_make_field($field_name, $type) {
+	$field = array(
+			'field_name' => $field_name,
+			'type' => $type,
+		);
+	
+	// check if field already exists
+	if(!field_info_field($field_name)) {
+		// create field
+		field_create_field($field);
+	}
+	else {
+		field_update_field($field);	
+	}
+	return $field;
+}
+
+/**
+ * field creater helper function checks if field already is in this bundle if so do update instead of create
+ */
+function popover_field_create_update_instance($instance) {
+	if( field_info_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']) == NULL) {
+		return field_create_instance($instance);
+	}
+	else{
+		return field_update_instance($instance);
+	}
+}
+
+/**
+ * @param string $field_name: name of the field
+ * @param string $field_label: label of the field ( visible before the field )
+ * @param int 	 $visible_on_registration_form: visible on registration form valid values: 1, 0
+ * @param string $field_type: type of field valid values: options_buttons, taxonomy_autocomplete, options_select, ...
+ */
+function _popover_make_instance($field_name, $field_label, $visible_on_registration_form, $field_type){
+	 // check if instance is created
+	$instance = array(
+		    'field_name' => $field_name, 
+			'entity_type' => 'user', 
+			'label' => $field_label, 
+			'bundle' => 'user',
+			// If you don't set the "required" property then the field wont be required by default.
+			'required' => TRUE,
+			'settings' => array(
+		   	// Here you inform either or not you want this field showing up on the registration form.
+		   		'user_register_form' => $visible_on_registration_form,
+			),
+			'widget' => array(
+				'type' => $field_type,
+			),
+		);
+	
+	if(!field_info_instance('user', $field_name, 'user')) {
+		field_create_instance($instance);
+	}
+	else {
+		field_update_instance($instance);
+	}
+	
+	return $instance;
+}		
+
+
+/**
+ * field creator helper function
+ */
+function popover_create_user_field($field_name, $field_label, $field_type, $visible_on_registration_form, $update = false) {
+	// Check if our field is not already created.	
+	if (!field_info_field($field_name)) {
+    	$field = array(
+        	'field_name' => $field_name, 
+			'type' => 'text', 
+		);
+		field_create_field($field);
+	
+		// Create the instance on the bundle.
+		$instance = array(
+		    'field_name' => $field_name, 
+			'entity_type' => 'user', 
+			'label' => $field_label, 
+			'bundle' => 'user',
+			// If you don't set the "required" property then the field wont be required by default.
+			'required' => TRUE,
+			'settings' => array(
+		   	// Here you inform either or not you want this field showing up on the registration form.
+		   		'user_register_form' => $visible_on_registration_form,
+			),
+			'widget' => array(
+				'type' => $field_type,
+			),
+		);
+	    field_create_instance($instance);
+	}
+	elseif ($update) { // if field exists do update on the field using this now to 
+		// Load the instance
+		$instance = field_info_instance('user', $field_name, 'user');
+		// print_r($instance);
+		// echo "<pre>";
+		// print_r(field_info_field($field_name));
+		// echo "</pre>";
+		// Make whatever changes you need to, e.g.
+		$instance['label'] = $field_label;
+		$instance['settings']['user_register_form'] = $visible_on_registration_form;
+		$instance['widget']['type'] = $field_type;
+		
+		// And save it again
+		field_update_instance($instance);
+	}
+}
+
+
+function popover_get_vocabulary_by_machine_name($voca_name) {	
+	$vocabs = taxonomy_get_vocabularies(NULL);
+	foreach($vocabs as $vocab_object) {
+		if($vocab_object->machine_name == $voca_name) {
+			return $vocab_object;
+		}
+	}
+	return NULL;
+}
+
+/**
+ * vocabulary holder ( should be a singleton but who cares ;) )
+ */
+class PopoverVocabularies {
+	
+	private $vocabularies = array();
+	
+	// setters
+
+	function add_vocabulary($title, $machine_name){
+		// check that vocabulary not already exists
+		if(array_key_exists($machine_name, $this->vocabularies)){
+			die('Vocabulary already created!');	
+		} 
+		else {
+			$vocabulary = new Vocabulary($title, $machine_name);
+			$this->vocabularies[$vocabulary->get_machine_name()] = $vocabulary;
+		}
+	}
+	
+	/**
+	 * @param string $vocabulary_machine_name unique name of an existing vocabulary
+	 * @param array $term_names An array of term names
+	 */
+	function add_terms($vocabulary_machine_name, $term_names){
+		if(is_array($term_names) && !empty($term_names)) {
+			foreach($term_names as $term_name)
+			{
+				$this->vocabularies[$vocabulary_machine_name]->add_term($term_name);
+			}	
+		}	
+	}
+	// getters
+	
+	// 
+}
+
+/**
+ * 
+ */
+class Vocabulary {
+	// private variables so functions are used to set / get variables
+	private $machine_name = "";
+	// private $name = ""; // not nessesery to store as private var, once set it won't be used?
+	private $vid = 0;
+	private $terms = array();
+	
+	function __construct($title, $machine_name) {
+		$this->machine_name = $machine_name;
+		// echo $this->name = $title;
+		// TODO check what tax_voc_mach_n_load returns on no result and repace '0' below with result
+		// die(taxonomy_vocabulary_machine_name_load($machine_name)->vid);
+		if(!taxonomy_vocabulary_machine_name_load($machine_name)) { // function returns false if machine_name does not exists
+			// if non existing create new:
+			taxonomy_vocabulary_save((object) array(
+				'name' => $title,
+				'machine_name' => $machine_name,
+			));
+		}
+		// load vid of old or new into private var $vid
+		$this->vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
+		
+		// load current terms in private terms_array
+		$terms = taxonomy_get_tree($this->vid);
+		// TODO check if array is not empty?
+		foreach($terms as $term){
+			$this->terms[$term->name] = $term->name;
+		}
+	}
+	
+	/**
+	 * add a term to current taxonomy vocabulary
+	 */
+	function add_term($term_name) {
+		if( !array_key_exists($term_name, $this->terms) ) {
+			$this->terms[] = $term_name;
+			taxonomy_term_save((object) array(
+				'name' => $term_name,
+				'vid' => $this->vid,
+				// weight
+			));
+		}
+	}
+	
+	function get_machine_name() {
+		return $this->machine_name;
+	}
+}
