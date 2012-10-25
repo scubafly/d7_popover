@@ -396,7 +396,7 @@ function _popover_make_field($field_name, $type) {
 		field_create_field($field);
 	}
 	else {
-		dsm('skippking field' . $field_name . 'already created')
+		dsm('skippking field' . $field_name . 'already created');
 		field_update_field($field);
 	}
 	return $field;
