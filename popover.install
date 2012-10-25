@@ -332,7 +332,7 @@ function popover_enable(){
 
 	$field = array(
 		'field_name' 	=> 'field_' .$vocabulary->machine_name,
-		'type' 				=> 'taxonomy_term',
+		'type' 				=> 'taxonomy_term_reference',
 		'settings' 	=> array(
 			'allowed_values' 	=> array(
 				array(
