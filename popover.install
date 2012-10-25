@@ -76,7 +76,6 @@ function popover_enable(){
 	//
 	// ------------------------------------------------------------------
 
-
 	// ==================================================================
 	//
 	// Werkweek
@@ -333,13 +332,13 @@ function popover_enable(){
 	taxonomy_vocabulary_save($vocabulary);
 
 	$field = array(
-		'field_name' = 'field_' .$vocabulary->machine_name,
-		'type' => 'taxonomy_term_reference',
-		'settings' => array(
-			'allowed_values' =>	array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
 				array(
-					'vid' => $vocabulary->vid,
-					'parent' => 0,
+					'vocabulary' 		=> $vocabulary->vid,
+					'parent' 	=> 0,
 				),
 			),
 		),
