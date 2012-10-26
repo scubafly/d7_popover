@@ -33,8 +33,7 @@ function popover_disable() {
 
 /**
  * cleanup helper function
- * @param  [type] $name [description]
- * @return [type]       [description]
+ * @param  String $name machine_name of the vocabulary ( 'field_' is added for the field/instance)
  */
 function _popover_cleanup_instance_field_vocabulary($name) {
 	$instance = field_info_instance('user','field_' . $name,'user');
@@ -510,24 +509,24 @@ function popover_enable() {
 }
 
 
-function _popover_make_field($field_name, $type) {
-	$field = array(
-			'field_name' => $field_name,
-			'type' => $type,
-		);
+// function _popover_make_field($field_name, $type) {
+// 	$field = array(
+// 			'field_name' => $field_name,
+// 			'type' => $type,
+// 		);
 
-	// check if field already exists
-	if(!field_info_field($field_name)) {
-		dsm('creating field ' . $field_name);
-		// create field
-		field_create_field($field);
-	}
-	else {
-		dsm('skippking field' . $field_name . 'already created');
-		field_update_field($field);
-	}
-	return $field;
-}
+// 	// check if field already exists
+// 	if(!field_info_field($field_name)) {
+// 		dsm('creating field ' . $field_name);
+// 		// create field
+// 		field_create_field($field);
+// 	}
+// 	else {
+// 		dsm('skippking field' . $field_name . 'already created');
+// 		field_update_field($field);
+// 	}
+// 	return $field;
+// }
 
 /**
  * field creater helper function checks if field already is in this bundle if so do update instead of create
@@ -541,86 +540,86 @@ function popover_field_create_update_instance($instance) {
 	}
 }
 
-/**
- * @param string $field_name: name of the field
- * @param string $field_label: label of the field ( visible before the field )
- * @param int 	 $visible_on_registration_form: visible on registration form valid values: 1, 0
- * @param string $field_type: type of field valid values: options_buttons, taxonomy_autocomplete, options_select, ...
- */
-function _popover_make_instance($field_name, $field_label, $visible_on_registration_form, $field_type){
-	 // check if instance is created
-	$instance = array(
-		    'field_name' => $field_name,
-			'entity_type' => 'user',
-			'label' => $field_label,
-			'bundle' => 'user',
-			// If you don't set the "required" property then the field wont be required by default.
-			'required' => TRUE,
-			'settings' => array(
-		   	// Here you inform either or not you want this field showing up on the registration form.
-		   		'user_register_form' => $visible_on_registration_form,
-			),
-			'widget' => array(
-				'type' => $field_type,
-			),
-		);
+// /**
+//  * @param string $field_name: name of the field
+//  * @param string $field_label: label of the field ( visible before the field )
+//  * @param int 	 $visible_on_registration_form: visible on registration form valid values: 1, 0
+//  * @param string $field_type: type of field valid values: options_buttons, taxonomy_autocomplete, options_select, ...
+//  */
+// function _popover_make_instance($field_name, $field_label, $visible_on_registration_form, $field_type){
+// 	 // check if instance is created
+// 	$instance = array(
+// 		    'field_name' => $field_name,
+// 			'entity_type' => 'user',
+// 			'label' => $field_label,
+// 			'bundle' => 'user',
+// 			// If you don't set the "required" property then the field wont be required by default.
+// 			'required' => TRUE,
+// 			'settings' => array(
+// 		   	// Here you inform either or not you want this field showing up on the registration form.
+// 		   		'user_register_form' => $visible_on_registration_form,
+// 			),
+// 			'widget' => array(
+// 				'type' => $field_type,
+// 			),
+// 		);
 
-	if(!field_info_instance('user', $field_name, 'user')) {
-		field_create_instance($instance);
-	}
-	else {
-		field_update_instance($instance);
-	}
+// 	if(!field_info_instance('user', $field_name, 'user')) {
+// 		field_create_instance($instance);
+// 	}
+// 	else {
+// 		field_update_instance($instance);
+// 	}
 
-	return $instance;
-}
+// 	return $instance;
+// }
 
 /**
  * field creator helper function
  */
-function popover_create_user_field($field_name, $field_label, $field_type, $visible_on_registration_form, $update = false) {
-	// Check if our field is not already created.
-	if (!field_info_field($field_name)) {
-    	$field = array(
-        	'field_name' => $field_name,
-			'type' => 'text',
-		);
-		field_create_field($field);
+// function popover_create_user_field($field_name, $field_label, $field_type, $visible_on_registration_form, $update = false) {
+// 	// Check if our field is not already created.
+// 	if (!field_info_field($field_name)) {
+//     	$field = array(
+//         	'field_name' => $field_name,
+// 			'type' => 'text',
+// 		);
+// 		field_create_field($field);
 
-		// Create the instance on the bundle.
-		$instance = array(
-		    'field_name' => $field_name,
-			'entity_type' => 'user',
-			'label' => $field_label,
-			'bundle' => 'user',
-			// If you don't set the "required" property then the field wont be required by default.
-			'required' => TRUE,
-			'settings' => array(
-		   	// Here you inform either or not you want this field showing up on the registration form.
-		   		'user_register_form' => $visible_on_registration_form,
-			),
-			'widget' => array(
-				'type' => $field_type,
-			),
-		);
-	    field_create_instance($instance);
-	}
-	elseif ($update) { // if field exists do update on the field using this now to
-		// Load the instance
-		$instance = field_info_instance('user', $field_name, 'user');
-		// print_r($instance);
-		// echo "<pre>";
-		// print_r(field_info_field($field_name));
-		// echo "</pre>";
-		// Make whatever changes you need to, e.g.
-		$instance['label'] = $field_label;
-		$instance['settings']['user_register_form'] = $visible_on_registration_form;
-		$instance['widget']['type'] = $field_type;
+// 		// Create the instance on the bundle.
+// 		$instance = array(
+// 		    'field_name' => $field_name,
+// 			'entity_type' => 'user',
+// 			'label' => $field_label,
+// 			'bundle' => 'user',
+// 			// If you don't set the "required" property then the field wont be required by default.
+// 			'required' => TRUE,
+// 			'settings' => array(
+// 		   	// Here you inform either or not you want this field showing up on the registration form.
+// 		   		'user_register_form' => $visible_on_registration_form,
+// 			),
+// 			'widget' => array(
+// 				'type' => $field_type,
+// 			),
+// 		);
+// 	    field_create_instance($instance);
+// 	}
+// 	elseif ($update) { // if field exists do update on the field using this now to
+// 		// Load the instance
+// 		$instance = field_info_instance('user', $field_name, 'user');
+// 		// print_r($instance);
+// 		// echo "<pre>";
+// 		// print_r(field_info_field($field_name));
+// 		// echo "</pre>";
+// 		// Make whatever changes you need to, e.g.
+// 		$instance['label'] = $field_label;
+// 		$instance['settings']['user_register_form'] = $visible_on_registration_form;
+// 		$instance['widget']['type'] = $field_type;
 
-		// And save it again
-		field_update_instance($instance);
-	}
-}
+// 		// And save it again
+// 		field_update_instance($instance);
+// 	}
+// }
 
 
 function popover_get_vocabulary_by_machine_name($voca_name) {
@@ -633,42 +632,42 @@ function popover_get_vocabulary_by_machine_name($voca_name) {
 	return NULL;
 }
 
-/**
- * vocabulary holder ( should be a singleton but who cares ;) )
- */
-class PopoverVocabularies {
+// /**
+//  * vocabulary holder ( should be a singleton but who cares ;) )
+//  */
+// class PopoverVocabularies {
 
-	private $vocabularies = array();
+// 	private $vocabularies = array();
 
-	// setters
+// 	// setters
 
-	function add_vocabulary($title, $machine_name){
-		// check that vocabulary not already exists
-		if(array_key_exists($machine_name, $this->vocabularies)){
-			drupal_set_message('Vocabulary ' . $title . ' already created!');
-		}
-		else {
-			$vocabulary = new Vocabulary($title, $machine_name);
-			$this->vocabularies[$vocabulary->get_machine_name()] = $vocabulary;
-		}
-	}
+// 	function add_vocabulary($title, $machine_name){
+// 		// check that vocabulary not already exists
+// 		if(array_key_exists($machine_name, $this->vocabularies)){
+// 			drupal_set_message('Vocabulary ' . $title . ' already created!');
+// 		}
+// 		else {
+// 			$vocabulary = new Vocabulary($title, $machine_name);
+// 			$this->vocabularies[$vocabulary->get_machine_name()] = $vocabulary;
+// 		}
+// 	}
 
-	/**
-	 * @param string $vocabulary_machine_name unique name of an existing vocabulary
-	 * @param array $term_names An array of term names
-	 */
-	function add_terms($vocabulary_machine_name, $term_names){
-		if(is_array($term_names) && !empty($term_names)) {
-			foreach($term_names as $term_name)
-			{
-				$this->vocabularies[$vocabulary_machine_name]->add_term($term_name);
-			}
-		}
-	}
-	// getters
+// 	/**
+// 	 * @param string $vocabulary_machine_name unique name of an existing vocabulary
+// 	 * @param array $term_names An array of term names
+// 	 */
+// 	function add_terms($vocabulary_machine_name, $term_names){
+// 		if(is_array($term_names) && !empty($term_names)) {
+// 			foreach($term_names as $term_name)
+// 			{
+// 				$this->vocabularies[$vocabulary_machine_name]->add_term($term_name);
+// 			}
+// 		}
+// 	}
+// 	// getters
 
-	//
-}
+// 	//
+// }
 
 /**
  * save multiple terms to one taxonomy Vocabulary
@@ -686,54 +685,54 @@ function _popover_taxonomy_terms_save($terms,$vid) {
 	}
 }
 
-/**
- *
- */
-class Vocabulary {
-	// private variables so functions are used to set / get variables
-	private $machine_name = "";
-	// private $name = ""; // not nessesery to store as private var, once set it won't be used?
-	private $vid = 0;
-	private $terms = array();
+// /**
+//  *
+//  */
+// class Vocabulary {
+// 	// private variables so functions are used to set / get variables
+// 	private $machine_name = "";
+// 	// private $name = ""; // not nessesery to store as private var, once set it won't be used?
+// 	private $vid = 0;
+// 	private $terms = array();
 
-	function __construct($title, $machine_name) {
-		$this->machine_name = $machine_name;
-		// echo $this->name = $title;
-		// TODO check what tax_voc_mach_n_load returns on no result and repace '0' below with result
-		// die(taxonomy_vocabulary_machine_name_load($machine_name)->vid);
-		if(!taxonomy_vocabulary_machine_name_load($machine_name)) { // function returns false if machine_name does not exists
-			// if non existing create new:
-			taxonomy_vocabulary_save((object) array(
-				'name' => $title,
-				'machine_name' => $machine_name,
-			));
-		}
-		// load vid of old or new into private var $vid
-		$this->vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
+// 	function __construct($title, $machine_name) {
+// 		$this->machine_name = $machine_name;
+// 		// echo $this->name = $title;
+// 		// TODO check what tax_voc_mach_n_load returns on no result and repace '0' below with result
+// 		// die(taxonomy_vocabulary_machine_name_load($machine_name)->vid);
+// 		if(!taxonomy_vocabulary_machine_name_load($machine_name)) { // function returns false if machine_name does not exists
+// 			// if non existing create new:
+// 			taxonomy_vocabulary_save((object) array(
+// 				'name' => $title,
+// 				'machine_name' => $machine_name,
+// 			));
+// 		}
+// 		// load vid of old or new into private var $vid
+// 		$this->vid = taxonomy_vocabulary_machine_name_load($machine_name)->vid;
 
-		// load current terms in private terms_array
-		$terms = taxonomy_get_tree($this->vid);
-		// TODO check if array is not empty?
-		foreach($terms as $term){
-			$this->terms[$term->name] = $term->name;
-		}
-	}
+// 		// load current terms in private terms_array
+// 		$terms = taxonomy_get_tree($this->vid);
+// 		// TODO check if array is not empty?
+// 		foreach($terms as $term){
+// 			$this->terms[$term->name] = $term->name;
+// 		}
+// 	}
 
-	/**
-	 * add a term to current taxonomy vocabulary
-	 */
-	function add_term($term_name) {
-		if( !array_key_exists($term_name, $this->terms) ) {
-			$this->terms[] = $term_name;
-			taxonomy_term_save((object) array(
-				'name' => $term_name,
-				'vid' => $this->vid,
-				// weight
-			));
-		}
-	}
+// 	/**
+// 	 * add a term to current taxonomy vocabulary
+// 	 */
+// 	function add_term($term_name) {
+// 		if( !array_key_exists($term_name, $this->terms) ) {
+// 			$this->terms[] = $term_name;
+// 			taxonomy_term_save((object) array(
+// 				'name' => $term_name,
+// 				'vid' => $this->vid,
+// 				// weight
+// 			));
+// 		}
+// 	}
 
-	function get_machine_name() {
-		return $this->machine_name;
-	}
-}
+// 	function get_machine_name() {
+// 		return $this->machine_name;
+// 	}
+// }
