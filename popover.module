@@ -162,8 +162,6 @@ function popover_ajax_user_login_form($form, &$from_state) {
  */
 function popover_job_agent_form($form, &$form_state){
 
-	dsm($form);
-
 	// use mail as username
 	// $form['name'] = array(
 		// '#title' => t('Username'),
@@ -261,8 +259,7 @@ function popover_job_agent_form($form, &$form_state){
 	// 	// '#field_parents' => array('field_city'),
 	// );
 
-	$voca = taxonomy_vocabulary_machine_name_load('field_city');
-	dsm($voca);
+	$voca = taxonomy_vocabulary_machine_name_load('city');
 	$form['first']['field_city'] = array(
 		'#type' => 'textfield',
 		'#title' => $voca->name,
@@ -274,7 +271,7 @@ function popover_job_agent_form($form, &$form_state){
 		// '#element_validate' => array('taxonomy_autocomplete_validate'),
 		// '#default_value' => 'test_default_value',
 		// '#autocomplete_path' => 'popover/cityautocomplete/'.$voca->vid,
-		'#autocomplete_path' => 'taxonomy/autocomplete/' . $voca->vid,
+		// '#autocomplete_path' => 'taxonomy/autocomplete/' . $voca->machine_name,
 		'#size' => 25,
 	);
 

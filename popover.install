@@ -9,6 +9,27 @@
  */
 
 /**
+ * Implements hook_disable()
+ * TODO: needs to be hook_uninstall in the future
+ */
+function popover_disable(){
+
+	$instance = field_info_instance('user','field_city','user');
+	field_delete_instance($instance, true);
+	field_delete_field('field_city');
+	field_purge_batch(9999999999999);
+	// field_delete_field('field_city');
+	// field_purge_batch(100);
+
+	// delete city vocabulary
+	$vid = db_select('taxonomy_vocabulary', 'v')
+    ->fields('v', array('vid'))
+    ->condition("v.machine_name", 'city')
+    ->execute()
+	->fetchField();
+  taxonomy_vocabulary_delete($vid);
+}
+/**
  * Implements hook_enable
  * runs every time this module is enabled, to run only at install use hook_install
  * Once the module has been enabled ( even only once ) hook_install won't be called anymore.
@@ -336,7 +357,7 @@ function popover_enable(){
 		'settings' 	=> array(
 			'allowed_values' 	=> array(
 				array(
-					'vocabulary' 		=> $vocabulary->vid,
+					'vocabulary' 		=> $vocabulary->machine_name,
 					'parent' 	=> 0,
 				),
 			),
@@ -345,14 +366,15 @@ function popover_enable(){
 
 	field_create_field($field);
 
-	// $term_names = array(
-	// 	'Amsterdam',
-	// 	'Rotterdam',
-	// 	'Rosmalen',
-	// 	'Driebergen',
-	// 	'Zeist',
-	// 	'Utrecht',
-	// );
+	$terms = array(
+		'Amsterdam',
+		'Rotterdam',
+		'Rosmalen',
+		'Driebergen',
+		'Zeist',
+		'Utrecht',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
 	// $vocabularies->add_vocabulary('Stad', 'field_city');
 	// $vocabularies->add_terms('field_city', $term_names);
 
@@ -539,6 +561,22 @@ class PopoverVocabularies {
 	// getters
 
 	//
+}
+
+/**
+ * save multiple terms to one taxonomy Vocabulary
+ * @param  array $terms array of term names
+ * @param  int   $vid   Vocabulary id
+ */
+function _popover_taxonomy_terms_save($terms,$vid) {
+	foreach($terms as $term) {
+		taxonomy_term_save(
+			(object) array(
+				'name' => $term,
+				'vid' => $vid,
+			)
+		);
+	}
 }
 
 /**
