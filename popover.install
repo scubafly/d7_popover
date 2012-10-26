@@ -12,42 +12,61 @@
  * Implements hook_disable()
  * TODO: needs to be hook_uninstall in the future
  */
-function popover_disable(){
+function popover_disable() {
+	// create array with instances/fields/vocabularies to cleanup
+  $cleanups = array(
+  	'city',
+  	'state',
+  	'werkweek',
+  	'dienstverb',
+  	'functioncat',
+  	'management_experience',
+  	'education',
+  );
+  foreach($cleanups as $name) {
+  	_popover_cleanup_instance_field_vocabulary($name);
+  }
 
-	$instance = field_info_instance('user','field_city','user');
+  // force field purge ( so it is really deleted without waiting for cron )
+	field_purge_batch(5000); // not sure if this is a to high number...
+}
+
+/**
+ * cleanup helper function
+ * @param  [type] $name [description]
+ * @return [type]       [description]
+ */
+function _popover_cleanup_instance_field_vocabulary($name) {
+	$instance = field_info_instance('user','field_' . $name,'user');
+	// removing instance of field_$name in the user bundle
 	field_delete_instance($instance, true);
-	field_delete_field('field_city');
-	field_purge_batch(9999999999999);
-	// field_delete_field('field_city');
-	// field_purge_batch(100);
+	// deleting field
+	field_delete_field('field_' . $name);
 
 	// delete city vocabulary
 	$vid = db_select('taxonomy_vocabulary', 'v')
     ->fields('v', array('vid'))
-    ->condition("v.machine_name", 'city')
+    ->condition("v.machine_name", $name)
     ->execute()
-	->fetchField();
+	  ->fetchField();
   taxonomy_vocabulary_delete($vid);
 }
+
 /**
  * Implements hook_enable
  * runs every time this module is enabled, to run only at install use hook_install
  * Once the module has been enabled ( even only once ) hook_install won't be called anymore.
  */
-function popover_enable(){
+function popover_enable() {
 	// create fields
-
 	// array of vacabularies
-
 	// define vocabularies and terms
-	$vocabularies = new PopoverVocabularies();
-
+	// $vocabularies = new PopoverVocabularies();
 	// ==================================================================
 	//
 	// unsed fields for now ...
 	//
 	// ------------------------------------------------------------------
-
 	// $term_names = array(
 	// 	'20.000 - 25.000',
 	// 	'25.000 - 30.000',
@@ -67,7 +86,6 @@ function popover_enable(){
 	// $vocabularies->add_vocabulary('Salaris indicatie','field_salery');
 	// $vocabularies->add_terms('field_salery', $term_names);
 	// $term_names = NULL;
-
 	// // worden niet gebruikt
 	// $term_names = array(
 	// 	0 => '0-2 jaar',
@@ -78,7 +96,6 @@ function popover_enable(){
 	// $vocabularies->add_vocabulary('Werkervaring', 'field_workexperience');
 	// $vocabularies->add_terms('field_workexperience', $term_names);
 	// $term_names = NULL;
-
 	// $term_names = array(
 	// 	'Direct',
 	// 	'1 Week',
@@ -90,251 +107,11 @@ function popover_enable(){
 	// $vocabularies->add_vocabulary('Beschikbaar in', 'field_availablein');
 	// $vocabularies->add_terms('field_availablein', $term_names);
 	// $term_names = NULL;
-
 	// ==================================================================
 	//
 	// end of non used fields
 	//
 	// ------------------------------------------------------------------
-
-	// ==================================================================
-	//
-	// Werkweek
-	//
-	// ------------------------------------------------------------------
-
-	$term_names = array(
-		'Fulltime',
-		'Parttime',
-	);
-	$vocabularies->add_vocabulary('Werkweek', 'field_werkweek');
-	$vocabularies->add_terms('field_werkweek', $term_names);
-	$term_names = NULL;
-
-	$instance = _popover_make_field('field_werkweek','taxonomy_term_reference');
-	$instance['field_name'] = 'field_werkweek'; //field_werkweek
-	$instance['entity_type'] = 'user';
-	$instance['label' ] = 'Werkweek';
-	$instance['bundle'] = 'user';
-	$instance['required'] = TRUE;
-	$instance['widget'] = array(
-	  'type' => 'options_buttons',
-	  'weight' => -4,
-	);
-	$instance['display'] = array(
-      'default' => array(
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 10,
-      ),
-      'teaser' => array(
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 10,
-      ),
-  	);
-
-	// if bundle user has this instance skip creation
-	popover_field_create_update_instance($instance);
-
-	// ==================================================================
-	//
-	// Dienstverband
-	//
-	// ------------------------------------------------------------------
-
-	$term_names = array(
-		'Tijdelijk',
-		'Vast',
-	);
-	$vocabularies->add_vocabulary('Dienstverband', 'field_dienstverb');
-	$vocabularies->add_terms('field_dienstverb', $term_names);
-	_popover_make_field('field_dienstverb','taxonomy_term_reference');
-
-	$instance = array(
-		  'field_name' => 'field_dienstverb', // field_dienstverband
-		  'entity_type' => 'user',
-		  'label' => 'Dienstverband',
-		  'bundle' => 'user',
-		  'required' => TRUE,
-		  'widget' => array(
-		    'type' => 'options_buttons',
-		    'weight' => -4,
-		  ),
-		  'display' => array(
-		    'default' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		    'teaser' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		  ),
-		);
-	popover_field_create_update_instance($instance);
-
-    // ==================================================================
-    //
-    // functie categorie
-    //
-    // ------------------------------------------------------------------
-
-    $vocabularies->add_vocabulary('Functie categorie', 'field_functioncat');
-	$vocabularies->add_terms('field_functioncat', $term_names);
-	_popover_make_field('field_functioncat','taxonomy_term_reference');
-
-	$instance = array(
-		  'field_name' => 'field_functioncat',
-		  'entity_type' => 'user',
-		  'label' => 'Functie categorie',
-		  'bundle' => 'user',
-		  'required' => TRUE,
-		  'widget' => array(
-		    'type' => 'options_buttons',
-		    'weight' => -4,
-		  ),
-		  'display' => array(
-		    'default' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		    'teaser' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		  ),
-		);
-	popover_field_create_update_instance($instance);
-
-
-	// ==================================================================
-	//
-	// Management ervaring
-	//
-	// ------------------------------------------------------------------
-
-
-	$term_names = array(
-		'Ja',
-		'Nee',
-	);
-	$vocabularies->add_vocabulary('Management ervaring', 'field_management_experience');
-	$vocabularies->add_terms('field_management_experience', $term_names);
-	$term_names = NULL;
-
-	_popover_make_field('field_management_experience','taxonomy_term_reference');
-	$instance = array(
-		  'field_name' => 'field_management_experience',
-		  'entity_type' => 'user',
-		  'label' => 'Management ervaring',
-		  'bundle' => 'user',
-		  'required' => TRUE,
-		  'widget' => array(
-		    'type' => 'options_buttons',
-		    'weight' => -4,
-		  ),
-		  'display' => array(
-		    'default' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		    'teaser' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		  ),
-		);
-	popover_field_create_update_instance($instance);
-
-	// ==================================================================
-	//
-	// Provincies
-	//
-	// ------------------------------------------------------------------
-
-
-	$term_names = array(
-		'Drenthe',
-		'Flevoland',
-		'Friesland',
-		'Gelderland',
-		'Groningen',
-		'Limburg',
-		'Noord-Brabant',
-		'Noord-Holland',
-		'Overijssel',
-		'Utrecht',
-		'Zeeland',
-		'Zuid-Holland',
-	);
-	$vocabularies->add_vocabulary('Provincie', 'field_state');
-	$vocabularies->add_terms('field_state', $term_names);
-	$term_names = NULL;
-	_popover_make_field('field_state','taxonomy_term_reference');
-	// provincie
-	$instance = array(
-		  'field_name' => 'field_state',
-		  'entity_type' => 'user',
-		  'label' => 'Provincie',
-		  'bundle' => 'user',
-		  'required' => TRUE,
-		  'user_register_form' => 1, // werkt niet?
-		  'widget' => array(
-		    'type' => 'options_select',
-		    'weight' => -4,
-		  ),
-		  'display' => array(
-		    'default' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		    'teaser' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		  ),
-		);
-	popover_field_create_update_instance($instance);
-
-	// ==================================================================
-	//
-	// Opleiding
-	//
-	// ------------------------------------------------------------------
-
-	$term_names = array(
-		0 => 'MBO / HAVO / VWO',
-		1 => 'HBO',
-		2 => 'WO',
-		3 => 'propodeuse+',
-	);
-	$vocabularies->add_vocabulary('Opleiding', 'field_education');
-	$vocabularies->add_terms('field_education', $term_names);
-
-	_popover_make_field('field_education', 'taxonomy_term_reference');
-
-	$instance = array(
-		  'field_name' => 'field_education',
-		  'entity_type' => 'user',
-		  'label' => 'Opleiding',
-		  'bundle' => 'user',
-		  'required' => TRUE,
-		  'widget' => array(
-		    'type' => 'options_buttons',
-		    'weight' => -4,
-		  ),
-		  'display' => array(
-		    'default' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		    'teaser' => array(
-		      'type' => 'taxonomy_term_reference_link',
-		      'weight' => 10,
-		    ),
-		  ),
-		);
-	popover_field_create_update_instance($instance);
-
 	// ==================================================================
 	//
 	// Woonplaats
@@ -342,30 +119,12 @@ function popover_enable(){
 	// for field_city doing a different aproach
 	//
 	// ------------------------------------------------------------------
-
 	$vocabulary = (object) array(
 		'name' => 'Stad',
 		'description' => 'kies een plaatsnaam uit de lijst.',
 		'machine_name' => 'city',
 	);
-
 	taxonomy_vocabulary_save($vocabulary);
-
-	$field = array(
-		'field_name' 	=> 'field_' .$vocabulary->machine_name,
-		'type' 				=> 'taxonomy_term_reference',
-		'settings' 	=> array(
-			'allowed_values' 	=> array(
-				array(
-					'vocabulary' 		=> $vocabulary->machine_name,
-					'parent' 	=> 0,
-				),
-			),
-		),
-	);
-
-	field_create_field($field);
-
 	$terms = array(
 		'Amsterdam',
 		'Rotterdam',
@@ -375,10 +134,20 @@ function popover_enable(){
 		'Utrecht',
 	);
 	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
-	// $vocabularies->add_vocabulary('Stad', 'field_city');
-	// $vocabularies->add_terms('field_city', $term_names);
 
-	// _popover_make_field('field_city', 'taxonomy_term_reference');
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
 
 	$instance = array(
 		'field_name' => 'field_' . $vocabulary->machine_name,
@@ -388,6 +157,7 @@ function popover_enable(){
 		'required' => TRUE,
 		'widget' => array(
 			'type' => 'taxonomy_autocomplete',
+			'weight' => -4,
 		),
 		'display' => array(
 			'default' => array(
@@ -401,7 +171,344 @@ function popover_enable(){
 		),
 	);
 	popover_field_create_update_instance($instance);
+
+	// ==================================================================
+	//
+	// Provincies
+	//
+	// ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Provincie',
+		// 'description' => '',
+		'machine_name' => 'state',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'Drenthe',
+		'Flevoland',
+		'Friesland',
+		'Gelderland',
+		'Groningen',
+		'Limburg',
+		'Noord-Brabant',
+		'Noord-Holland',
+		'Overijssel',
+		'Utrecht',
+		'Zeeland',
+		'Zuid-Holland',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_select',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
+	// ==================================================================
+	//
+	// Werkweek
+	//
+	// ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Werkweek',
+		// 'description' => '',
+		'machine_name' => 'werkweek',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'Fulltime',
+		'Parttime',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_buttons',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
+	// ==================================================================
+	//
+	// Dienstverband
+	//
+	// ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Dienstverband',
+		// 'description' => '',
+		'machine_name' => 'dienstverb',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'Tijdelijk',
+		'Vast',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_buttons',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
+  // ==================================================================
+  //
+  // functie categorie
+  //
+  // ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Functie categorie',
+		// 'description' => '',
+		'machine_name' => 'functioncat',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'aanpassen',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_buttons',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
+	// ==================================================================
+	//
+	// Management ervaring
+	//
+	// ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Management ervaring',
+		// 'description' => '',
+		'machine_name' => 'management_experience',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'Ja',
+		'Nee',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_buttons',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
+	// ==================================================================
+	//
+	// Opleiding
+	//
+	// ------------------------------------------------------------------
+	$vocabulary = (object) array(
+		'name' => 'Opleiding',
+		// 'description' => '',
+		'machine_name' => 'education',
+	);
+	taxonomy_vocabulary_save($vocabulary);
+	$terms = array(
+		'MBO / HAVO / VWO',
+		'HBO',
+		'WO',
+		'propodeuse+',
+	);
+	_popover_taxonomy_terms_save($terms,$vocabulary->vid);
+
+	$field = array(
+		'field_name' 	=> 'field_' .$vocabulary->machine_name,
+		'type' 				=> 'taxonomy_term_reference',
+		'settings' 	=> array(
+			'allowed_values' 	=> array(
+				array(
+					'vocabulary' 	=> $vocabulary->machine_name,
+					'parent' 	=> 0,
+				),
+			),
+		),
+	);
+	field_create_field($field);
+
+	$instance = array(
+		'field_name' => 'field_' . $vocabulary->machine_name,
+		'entity_type' => 'user',
+		'label' => $vocabulary->name,
+		'bundle' => 'user',
+		'required' => TRUE,
+		'widget' => array(
+			'type' => 'options_buttons',
+			'weight' => -4,
+		),
+		'display' => array(
+			'default' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+			'teaser' => array(
+				'type' => 'taxonomy_term_reference_link',
+				'weight' => 10,
+			),
+		),
+	);
+	popover_field_create_update_instance($instance);
+
 }
+
 
 function _popover_make_field($field_name, $type) {
 	$field = array(

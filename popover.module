@@ -527,6 +527,47 @@ function popover_ajax_user_login_form_validate($form, &$form_state) {
 	}
 }
 
+function popover_form_alter(&$form, &$form_state, $form_id) {
+	dsm($form_id);
+	$form_ids = array(
+		'job_agent_form', // TODO: check this is the right name
+		'user_profile_form',
+	);
+
+	if(in_array($form_id, $form_ids)) {
+		$form['#validate'][] = 'popover_validate_city_callback';
+	}
+}
+
+function popover_validate_city_callback($form, &$form_state) {
+	// dsm($form['field_city']);
+	// $city = array_keys($form_state['values']['first']['field_city']);
+	// $city_name = $form_state['values']['first']['field_city'][$city[0]];
+	$city_name = $form['field_city']['und']['#value'];
+	$result = taxonomy_get_term_by_name($city_name, 'city');
+	// check the result
+	if(!$result) {
+		/* removed inserting of new values. and added custom error if value doesn't exists. to let users insert values uncomment the code and remove the error
+		// insert the new term name:
+		// get taxonomy id
+		$field_name = 'field_city';
+		// Get the field info
+		$info = field_info_field($field_name);
+		// The link to the vocab is stored as it's machine name
+		$vocab_machine_name = $info['settings']['allowed_values'][0]['vocabulary'];
+		// Load the vocab by machine name
+		$vocab = taxonomy_vocabulary_machine_name_load($vocab_machine_name);
+		// Finally, get the vid
+		$vid = $vocab->vid;
+		// create new term name
+		$term = new stdClass();
+		$term->vid = $vid;
+		$term->name = $city_name;
+		taxonomy_term_save($term);
+		*/
+		form_set_error('Stad', t('Uw plaatsnaam is niet beschikbaar, selecteer de dichtstbijzijnde gemeente uit de lijst.'));
+	}
+}
 /**
  * Implements hook_form_validate()
  * originaly was popover_form_validate()
@@ -551,32 +592,7 @@ function popover_job_agent_form_validate($form, &$form_state) {
 
 	// check field_city if term (city) exists in vocabulary
 
-	$city = array_keys($form_state['values']['first']['field_city']);
-	$city_name = $form_state['values']['first']['field_city'][$city[0]];
-	$result = taxonomy_get_term_by_name($city_name, 'field_city');
 
-	// check the result
-	if(!$result) {
-		/* removed inserting of new values. and added custom error if value doesn't exists. to let users insert values uncomment the code
-		// insert the new term name:
-		// get taxonomy id
-		$field_name = 'field_city';
-		// Get the field info
-		$info = field_info_field($field_name);
-		// The link to the vocab is stored as it's machine name
-		$vocab_machine_name = $info['settings']['allowed_values'][0]['vocabulary'];
-		// Load the vocab by machine name
-		$vocab = taxonomy_vocabulary_machine_name_load($vocab_machine_name);
-		// Finally, get the vid
-		$vid = $vocab->vid;
-		// create new term name
-		$term = new stdClass();
-		$term->vid = $vid;
-		$term->name = $city_name;
-		taxonomy_term_save($term);
-		*/
-		form_set_error('Stad', t('Uw plaatsnaam is niet beschikbaar, selecteer de dichtstbijzijnde gemeente uit de lijst.'));
-	}
 
 	/**
 	// TODO custom validation upon cv-uploaden selection
